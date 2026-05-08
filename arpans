@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Blog</title>
+<style>
+  :root {
+    --glass-bg: rgba(255,255,255,0.55);
+    --glass-border: rgba(255,255,255,0.7);
+    --glass-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    --blur: blur(20px);
+    --accent: #6366f1;
+    --accent-soft: rgba(99,102,241,0.12);
+    --text: #1a1a2e;
+    --text-2: #64647a;
+    --text-3: #9999b0;
+    --bg: #f0f0f7;
+    --bg-2: #e8e8f2;
+    --card-bg: rgba(255,255,255,0.7);
+    --radius: 18px;
+    --radius-sm: 12px;
+    --radius-pill: 100px;
+    --transition: 0.35s cubic-bezier(.4,0,.2,1);
+  }
+  @media(prefers-color-scheme:dark){
+    :root{
+      --glass-bg: rgba(30,30,50,0.6);
+      --glass-border: rgba(255,255,255,0.12);
+      --glass-shadow: 0 8px 32px rgba(0,0,0,0.35);
+      --text: #f0f0ff;
+      --text-2: #9999cc;
+      --text-3: #55556a;
+      --bg: #0f0f1a;
+      --bg-2: #16162a;
+      --card-bg: rgba(30,30,55,0.75);
+      --accent-soft: rgba(99,102,241,0.18);
+    }
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+
+  /* ANIMATED BG ORBS */
+  .orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+  .orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.35;animation:drift 18s ease-in-out infinite;}
+  .orb1{width:500px;height:500px;background:radial-gradient(circle,#a78bfa,#6366f1);top:-120px;left:-100px;animation-delay:0s;}
+  .orb2{width:400px;height:400px;background:radial-gradient(circle,#f0abfc,#818cf8);top:30%;right:-100px;animation-delay:-6s;}
+  .orb3{width:350px;height:350px;background:radial-gradient(circle,#7dd3fc,#a78bfa);bottom:-100px;left:30%;animation-delay:-12s;}
+  @keyframes drift{
+    0%,100%{transform:translate(0,0) scale(1);}
+    33%{transform:translate(40px,-30px) scale(1.08);}
+    66%{transform:translate(-25px,40px) scale(.95);}
+  }
+
+  /* GLASS UTIL */
+  .glass{
+    background:var(--glass-bg);
+    backdrop-filter:var(--blur);
+    -webkit-backdrop-filter:var(--blur);
+    border:1px solid var(--glass-border);
+    box-shadow:var(--glass-shadow);
+  }
+
+  /* NAV */
+  nav{
+    position:fixed;top:16px;left:50%;transform:translateX(-50%);
+    z-index:100;border-radius:var(--radius-pill);
+    padding:10px 20px;display:flex;align-items:center;gap:12px;
+    width:min(680px,calc(100vw - 32px));
+    transition:var(--transition);
+  }
+  nav::before{
+    content:'';position:absolute;inset:0;border-radius:inherit;
+    background:linear-gradient(135deg,rgba(255,255,255,.2) 0%,rgba(255,255,255,0) 100%);
+    pointer-events:none;
+  }
+  .nav-logo{font-size:15px;font-weight:600;flex:1;cursor:pointer;letter-spacing:-.3px;}
+  .nav-logo span{color:var(--accent);}
+  .nav-links{display:flex;gap:6px;}
+  .nav-btn{
+    font-size:12px;font-weight:500;padding:7px 16px;border-radius:var(--radius-pill);
+    cursor:pointer;border:1px solid rgba(255,255,255,.3);
+    background:rgba(255,255,255,.1);color:var(--text);
+    transition:var(--transition);letter-spacing:.01em;
+    display:flex;align-items:center;gap:5px;
+  }
+  .nav-btn:hover{background:rgba(255,255,255,.25);transform:translateY(-1px);}
+  .nav-btn.active{background:var(--accent);color:#fff;border-color:transparent;box-shadow:0 4px 16px rgba(99,102,241,.4);}
+
+  /* PAGES */
+  .page{display:none;position:relative;z-index:1;padding:100px 20px 120px;max-width:720px;margin:0 auto;animation:fadeUp .4s ease both;}
+  .page.active{display:block;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+
+  /* HERO */
+  .hero-chip{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:12px;padding:6px 14px;border-radius:var(--radius-pill);
+    background:var(--accent-soft);color:var(--accent);font-weight:500;
+    margin-bottom:20px;border:1px solid rgba(99,102,241,.2);
+  }
+  .pulse{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pulse 2s ease infinite;}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(.7);}}
+  h1.hero-title{font-size:clamp(30px,6vw,48px);font-weight:700;line-height:1.1;letter-spacing:-.03em;margin-bottom:14px;}
+  h1.hero-title span{
+    background:linear-gradient(135deg,var(--accent),#a78bfa,#f0abfc);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  }
+  .hero-sub{font-size:16px;color:var(--text-2);line-height:1.7;margin-bottom:28px;max-width:500px;}
+  .hero-btns{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:48px;}
+  .btn{
+    padding:11px 22px;border-radius:var(--radius-pill);font-size:13px;font-weight:500;
+    cursor:pointer;border:none;transition:var(--transition);display:inline-flex;align-items:center;gap:7px;
+  }
+  .btn-primary{background:var(--accent);color:#fff;box-shadow:0 4px 20px rgba(99,102,241,.4);}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(99,102,241,.5);}
+  .btn-ghost{background:var(--card-bg);color:var(--text);border:1px solid var(--glass-border);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);}
+  .btn-ghost:hover{transform:translateY(-2px);background:rgba(255,255,255,.85);}
+  @media(prefers-color-scheme:dark){.btn-ghost:hover{background:rgba(40,40,70,.9);}}
+
+  /* SECTION LABEL */
+  .sec-label{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);margin-bottom:14px;}
+
+  /* FEATURED CARD */
+  .featured-card{
+    border-radius:var(--radius);padding:22px 24px;margin-bottom:28px;
+    cursor:pointer;transition:var(--transition);position:relative;overflow:hidden;
+  }
+  .featured-card::before{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(167,139,250,.05));
+    pointer-events:none;
+  }
+  .featured-card:hover{transform:translateY(-3px);box-shadow:0 20px 48px rgba(0,0,0,.12);}
+  .feat-tag{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:4px 10px;border-radius:20px;margin-bottom:10px;}
+  .feat-title{font-size:20px;font-weight:600;line-height:1.3;margin-bottom:8px;letter-spacing:-.02em;}
+  .feat-excerpt{font-size:14px;color:var(--text-2);line-height:1.7;margin-bottom:14px;}
+  .feat-meta{font-size:12px;color:var(--text-3);display:flex;gap:14px;align-items:center;}
+
+  /* BLOG GRID */
+  .blog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;}
+  .blog-card{
+    border-radius:var(--radius-sm);padding:18px;cursor:pointer;
+    transition:var(--transition);
+  }
+  .blog-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.1);}
+  .card-tag{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+  .card-title{font-size:14px;font-weight:600;line-height:1.4;margin-bottom:6px;letter-spacing:-.01em;}
+  .card-excerpt{font-size:12px;color:var(--text-2);line-height:1.6;margin-bottom:10px;}
+  .card-meta{font-size:11px;color:var(--text-3);}
+
+  /* TAG FILTER */
+  .tag-filter{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:20px;}
+  .tag-btn{
+    font-size:11px;font-weight:500;padding:5px 13px;border-radius:var(--radius-pill);
+    cursor:pointer;border:1px solid var(--glass-border);background:var(--card-bg);
+    color:var(--text-2);transition:var(--transition);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  }
+  .tag-btn:hover,.tag-btn.active{background:var(--accent);color:#fff;border-color:transparent;}
+
+  /* POST VIEW */
+  .post-back{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--text-2);cursor:pointer;margin-bottom:28px;transition:var(--transition);}
+  .post-back:hover{color:var(--accent);transform:translateX(-3px);}
+  .post-title{font-size:clamp(22px,4vw,32px);font-weight:700;line-height:1.2;letter-spacing:-.03em;margin-bottom:12px;}
+  .post-meta{font-size:13px;color:var(--text-3);margin-bottom:28px;display:flex;gap:14px;}
+  .post-body{font-size:16px;line-height:1.85;color:var(--text-2);}
+  .post-body p{margin-bottom:20px;}
+  .post-body h2{font-size:20px;font-weight:600;color:var(--text);margin:32px 0 12px;letter-spacing:-.02em;}
+  .post-body blockquote{
+    border-left:3px solid var(--accent);padding:14px 20px;margin:24px 0;
+    background:var(--accent-soft);border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+    font-style:italic;color:var(--text);
+  }
+
+  /* ABOUT */
+  .about-avatar{
+    width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#a78bfa);
+    display:flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:20px;
+    box-shadow:0 8px 32px rgba(99,102,241,.3);
+  }
+  .about-name{font-size:26px;font-weight:700;letter-spacing:-.03em;margin-bottom:6px;}
+  .about-role{font-size:15px;color:var(--accent);font-weight:500;margin-bottom:16px;}
+  .about-bio{font-size:15px;color:var(--text-2);line-height:1.8;margin-bottom:28px;}
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px;}
+  .info-card{border-radius:var(--radius-sm);padding:16px;}
+  .info-label{font-size:11px;color:var(--text-3);font-weight:500;margin-bottom:4px;letter-spacing:.05em;text-transform:uppercase;}
+  .info-val{font-size:14px;font-weight:500;}
+  .skills{display:flex;flex-wrap:wrap;gap:8px;}
+  .skill-tag{font-size:12px;padding:6px 14px;border-radius:var(--radius-pill);background:var(--accent-soft);color:var(--accent);font-weight:500;border:1px solid rgba(99,102,241,.2);}
+
+  /* CONTACT */
+  .contact-intro{font-size:15px;color:var(--text-2);line-height:1.7;margin-bottom:28px;}
+  .contact-form{display:flex;flex-direction:column;gap:14px;}
+  .field-label{font-size:12px;font-weight:500;color:var(--text-2);margin-bottom:6px;display:block;}
+  .field{
+    width:100%;padding:12px 16px;border-radius:var(--radius-sm);
+    border:1px solid var(--glass-border);background:var(--card-bg);
+    font-size:14px;color:var(--text);font-family:inherit;
+    backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+    transition:var(--transition);outline:none;
+  }
+  .field:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,.15);}
+  textarea.field{height:120px;resize:vertical;}
+  .contact-links{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;}
+  .contact-link{
+    display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:500;
+    padding:9px 18px;border-radius:var(--radius-pill);border:1px solid var(--glass-border);
+    background:var(--card-bg);color:var(--text);cursor:pointer;
+    backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);transition:var(--transition);
+    text-decoration:none;
+  }
+  .contact-link:hover{background:var(--accent);color:#fff;border-color:transparent;transform:translateY(-2px);}
+
+  /* TOAST */
+  .toast{
+    position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);
+    padding:12px 22px;border-radius:var(--radius-pill);font-size:13px;font-weight:500;
+    background:var(--accent);color:#fff;z-index:200;opacity:0;transition:all .4s ease;pointer-events:none;
+    box-shadow:0 8px 24px rgba(99,102,241,.4);
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* FLOAT PILL */
+  .float-pill{
+    position:fixed;bottom:24px;right:24px;z-index:100;
+    padding:10px 18px;border-radius:var(--radius-pill);
+    display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;
+    cursor:pointer;transition:var(--transition);
+  }
+  .float-pill:hover{transform:scale(1.06) translateY(-2px);}
+  .float-pill svg{width:15px;height:15px;}
+
+  /* SHIMMER ANIMATION ON CARDS */
+  @keyframes shimmer{
+    0%{background-position:200% center;}
+    100%{background-position:-200% center;}
+  }
+  .shimmer-line{
+    height:2px;width:100%;border-radius:1px;
+    background:linear-gradient(90deg,transparent,rgba(99,102,241,.5),transparent);
+    background-size:200% 100%;
+    animation:shimmer 3s linear infinite;
+    margin-bottom:16px;
+  }
+
+  /* SECTION TITLE */
+  .sec-title{font-size:22px;font-weight:700;letter-spacing:-.03em;margin-bottom:6px;}
+  .sec-title span{color:var(--accent);}
+  .sec-desc{font-size:14px;color:var(--text-2);margin-bottom:24px;}
+
+  /* HR */
+  .divider{height:1px;background:var(--glass-border);margin:32px 0;}
+</style>
+</head>
+<body>
+
+<div class="orbs">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+
+<!-- NAV -->
+<nav class="glass" id="nav">
+  <div class="nav-logo" onclick="showPage('home')">✦ <span>mind</span>log</div>
+  <div class="nav-links">
+    <div class="nav-btn active" id="nav-home" onclick="showPage('home')">Blog</div>
+    <div class="nav-btn" id="nav-about" onclick="showPage('about')">About</div>
+    <div class="nav-btn" id="nav-contact" onclick="showPage('contact')">Contact</div>
+  </div>
+</nav>
+
+<!-- HOME PAGE -->
+<div class="page active" id="page-home">
+  <!-- HERO -->
+  <div class="hero-chip"><div class="pulse"></div> writing & thinking in public</div>
+  <h1 class="hero-title">Hi, I'm <span>Your Name</span> ✦</h1>
+  <p class="hero-sub">A personal space where I share thoughts, stories, and ideas that feel worth writing down.</p>
+  <div class="hero-btns">
+    <button class="btn btn-primary" onclick="document.getElementById('feed').scrollIntoView({behavior:'smooth'})">
+      ✦ Read my blog
+    </button>
+    <button class="btn btn-ghost glass" onclick="showPage('about')">
+      About me
+    </button>
+    <button class="btn btn-ghost glass" onclick="showPage('contact')">
+      Get in touch
+    </button>
+  </div>
+
+  <!-- FEATURED -->
+  <div class="sec-label">Featured post</div>
+  <div class="featured-card glass" onclick="openPost('featured')">
+    <div class="shimmer-line"></div>
+    <div class="feat-tag">✦ Featured</div>
+    <div class="feat-title">Why I started writing in public — and what happened next</div>
+    <div class="feat-excerpt">I used to keep everything in drafts. Thoughts half-finished, ideas with no home. Then one day I just hit publish. Here's what changed.</div>
+    <div class="feat-meta">
+      <span>May 2025</span>
+      <span>·</span>
+      <span>5 min read</span>
+      <span>·</span>
+      <span style="color:var(--accent)">Read →</span>
+    </div>
+  </div>
+
+  <!-- FEED -->
+  <div id="feed">
+    <div class="sec-label">All posts</div>
+    <div class="tag-filter" id="tagFilter">
+      <div class="tag-btn active" onclick="filterTag(this,'all')">All</div>
+      <div class="tag-btn" onclick="filterTag(this,'life')">Life</div>
+      <div class="tag-btn" onclick="filterTag(this,'design')">Design</div>
+      <div class="tag-btn" onclick="filterTag(this,'code')">Code</div>
+      <div class="tag-btn" onclick="filterTag(this,'thoughts')">Thoughts</div>
+    </div>
+    <div class="blog-grid" id="blogGrid"></div>
+  </div>
+</div>
+
+<!-- POST VIEW PAGE -->
+<div class="page" id="page-post">
+  <div class="post-back" onclick="showPage('home')">← Back to blog</div>
+  <div id="postContent"></div>
+</div>
+
+<!-- ABOUT PAGE -->
+<div class="page" id="page-about">
+  <div class="about-avatar">🧠</div>
+  <div class="about-name">Your Name</div>
+  <div class="about-role">Writer · Thinker · Builder</div>
+  <div class="about-bio">
+    I'm a curious human who writes about design, code, life, and the occasional philosophical rabbit hole. 
+    I believe writing helps you think — not the other way around. Based somewhere on Earth, usually caffeinated.
+  </div>
+  <div class="divider"></div>
+  <div class="sec-label">Quick info</div>
+  <div class="info-grid">
+    <div class="info-card glass"><div class="info-label">Location</div><div class="info-val">India 🇮🇳</div></div>
+    <div class="info-card glass"><div class="info-label">Writing since</div><div class="info-val">2022</div></div>
+    <div class="info-card glass"><div class="info-label">Posts published</div><div class="info-val">24</div></div>
+    <div class="info-card glass"><div class="info-label">Favourite topic</div><div class="info-val">Thinking about thinking</div></div>
+  </div>
+  <div class="divider"></div>
+  <div class="sec-label">Interests & skills</div>
+  <div class="skills">
+    <span class="skill-tag">Writing</span>
+    <span class="skill-tag">Design</span>
+    <span class="skill-tag">Philosophy</span>
+    <span class="skill-tag">Web dev</span>
+    <span class="skill-tag">Minimalism</span>
+    <span class="skill-tag">Photography</span>
+    <span class="skill-tag">Reading</span>
+  </div>
+</div>
+
+<!-- CONTACT PAGE -->
+<div class="page" id="page-contact">
+  <div class="sec-title">Say <span>hello</span> 👋</div>
+  <p class="contact-intro">Have a thought, idea, collaboration, or just want to say hi? I read every message and try to reply to most. Don't be shy.</p>
+
+  <div class="contact-form">
+    <div>
+      <label class="field-label">Your name</label>
+      <input class="field" type="text" placeholder="What should I call you?" id="f-name">
+    </div>
+    <div>
+      <label class="field-label">Email</label>
+      <input class="field" type="email" placeholder="your@email.com" id="f-email">
+    </div>
+    <div>
+      <label class="field-label">Message</label>
+      <textarea class="field" placeholder="What's on your mind?" id="f-msg"></textarea>
+    </div>
+    <button class="btn btn-primary" onclick="sendMsg()" style="width:fit-content;">Send message →</button>
+  </div>
+
+  <div class="divider"></div>
+  <div class="sec-label">Find me elsewhere</div>
+  <div class="contact-links">
+    <a class="contact-link" href="#">𝕏 Twitter</a>
+    <a class="contact-link" href="#">⌥ GitHub</a>
+    <a class="contact-link" href="#">in LinkedIn</a>
+    <a class="contact-link" href="#">✉ Email</a>
+  </div>
+</div>
+
+<!-- FLOAT PILL -->
+<div class="float-pill glass" onclick="scrollTop()">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 15l-6-6-6 6"/></svg>
+  Top
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const posts = [
+  {id:'on-slowing-down',tag:'life',title:'On slowing down',excerpt:'The world keeps accelerating. I decided to stop keeping up.',date:'Apr 2025',read:'3 min'},
+  {id:'simplicity-is-hard',tag:'design',title:'Simplicity is hard',excerpt:'Every good design is the result of a thousand decisions you never see.',date:'Mar 2025',read:'4 min'},
+  {id:'my-dev-setup',tag:'code',title:'My dev setup in 2025',excerpt:"Here's everything I use to write, build, and ship — kept minimal on purpose.",date:'Feb 2025',read:'6 min'},
+  {id:'morning-pages',tag:'thoughts',title:'30 days of morning pages',excerpt:'I wrote three pages every morning for a month. Here is what I noticed.',date:'Jan 2025',read:'5 min'},
+  {id:'less-news',tag:'life',title:'I quit news for 60 days',excerpt:"I stopped reading news cold turkey. My brain felt weird at first, then good.",date:'Dec 2024',read:'4 min'},
+  {id:'typography',tag:'design',title:'Why typography changes everything',excerpt:'The font is never "just a font." It changes the entire feel of what you say.',date:'Nov 2024',read:'3 min'},
+];
+
+const postContent = {
+  featured: {
+    tag:'Featured',title:'Why I started writing in public — and what happened next',date:'May 2025',read:'5 min',
+    body:`<p>For a long time I kept everything in drafts. Observations, half-ideas, things I noticed but never finished thinking through. My notes app was a graveyard of good intentions.</p>
+    <blockquote>"You don't write because you're ready. You write to find out what you think."</blockquote>
+    <p>Then one Tuesday, almost on impulse, I hit publish on something I wasn't sure about. Something short, a little raw, honest in a way I usually edited out.</p>
+    <h2>What actually changed</h2>
+    <p>Three things happened that I didn't expect. First, I thought more clearly. Having a potential reader — even an imaginary one — forces you to actually finish a thought. Second, people responded. Not many at first, but some. That felt strange and good. Third, I started collecting experiences differently. Everything became potentially writable.</p>
+    <p>I'm not here to build an audience or grow a newsletter. I'm here because writing is thinking, and I want to think better. If you're reading this, thanks for being part of that.</p>`
+  }
+};
+posts.forEach(p => {
+  postContent[p.id] = {
+    tag:p.tag,title:p.title,date:p.date,read:p.read,
+    body:`<p>This is where the full post for "<strong>${p.title}</strong>" would live. Write whatever you like here — your thoughts, your story, your experience.</p>
+    <h2>Your section heading</h2>
+    <p>Keep going. This is your space. No word count requirements, no algorithm to please. Just write what feels honest.</p>
+    <blockquote>Add a quote that moved you or made you think.</blockquote>
+    <p>And that's a good place to end — or keep going. Up to you.</p>`
+  };
+});
+
+let activeTag = 'all';
+
+function renderGrid(tag){
+  const g = document.getElementById('blogGrid');
+  const filtered = tag==='all' ? posts : posts.filter(p=>p.tag===tag);
+  g.innerHTML = filtered.map(p=>`
+    <div class="blog-card glass" onclick="openPost('${p.id}')">
+      <div class="card-tag">${p.tag}</div>
+      <div class="card-title">${p.title}</div>
+      <div class="card-excerpt">${p.excerpt}</div>
+      <div class="card-meta">${p.date} · ${p.read} read</div>
+    </div>`).join('');
+}
+
+function filterTag(el, tag){
+  document.querySelectorAll('.tag-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  activeTag = tag;
+  renderGrid(tag);
+}
+
+function openPost(id){
+  const p = postContent[id];
+  if(!p) return;
+  document.getElementById('postContent').innerHTML = `
+    <div class="post-meta"><span style="color:var(--accent);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:.07em">${p.tag}</span><span>${p.date}</span><span>${p.read} read</span></div>
+    <h1 class="post-title">${p.title}</h1>
+    <div class="divider"></div>
+    <div class="post-body">${p.body}</div>`;
+  showPage('post');
+}
+
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  const navId = name==='post'?'nav-home':'nav-'+name;
+  const navEl = document.getElementById(navId);
+  if(navEl) navEl.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function scrollTop(){window.scrollTo({top:0,behavior:'smooth'});}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+function sendMsg(){
+  const n=document.getElementById('f-name').value.trim();
+  const e=document.getElementById('f-email').value.trim();
+  const m=document.getElementById('f-msg').value.trim();
+  if(!n||!e||!m){showToast('Please fill all fields ✦');return;}
+  showToast('Message sent! I\'ll reply soon 💌');
+  document.getElementById('f-name').value='';
+  document.getElementById('f-email').value='';
+  document.getElementById('f-msg').value='';
+}
+
+renderGrid('all');
+</script>
+</body>
+</html>
